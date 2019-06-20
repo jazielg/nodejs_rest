@@ -22,25 +22,25 @@ app.get('/api/users', async (req, res) => {
 	// res.status(200).json(usersJson)
 })
 
-// Show
+// Read
 app.get('/api/user/:id', async (req, res) => {
 	// Mysql
-	const user = await mysql.show({id: req.params.id})
+	const user = await mysql.read({id: req.params.id})
 	res.status(200).json(user)
 
 	// JSON
 	//res.json(users.filter(user => user.id === parseInt(req.params.id)))
 })
 
-// Store
+// Create
 app.post('/api/user', async (req, res) => {
-	newUser = {
+	const newUser = {
 		nome: req.body.nome,
 		idade: req.body.idade
 	}
 
 	// MySql
-	data = await mysql.store(newUser)
+	const data = await mysql.create(newUser)
 	res.status(201).json({msg: 'Criado com sucesso', data})
 
 	// JSON
@@ -49,25 +49,32 @@ app.post('/api/user', async (req, res) => {
 })
 
 // Update
-app.put('/api/user/:id', (req, res) => {
-	const indice = users.findIndex(item => item.id === parseInt(req.params.id))
-    
-    	if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
+app.put('/api/user/:id', async (req, res) => {
+	// Mysql
+	const [data] = await mysql.update(req.body, req.params.id)
+	if(data === 1) res.status(200).json({msg:"Usuario atualizado com sucesso"})
+	res.status(422).json({msg:"Usuarios com parametros errados"})
 
-	updateUser = req.body
-	
-    	users[indice] = {...users[indice], ...updateUser}
-	res.status(200).json({msg:"Usuario atualizado com sucesso"})
+	// JSON
+	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))
+    // if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
+	// updateUser = req.body
+    // users[indice] = {...users[indice], ...updateUser}
+	// res.status(200).json({msg:"Usuario atualizado com sucesso"})
 })
 
-// Destroy
-app.delete('/api/user/:id', (req, res) => {
-	const indice = users.findIndex(item => item.id === parseInt(req.params.id))
+// Delete
+app.delete('/api/user/:id', async (req, res) => {
+	// Mysql
+	const data = await mysql.delete(req.params.id)
+	if(data === 1) res.status(200).json({msg:"Usuario deletado com sucesso"})
+	res.status(404).json({msg:"Usuario não foi encontrado"})
 
-	if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
-
-	users.splice(indice, 1)
-	res.status(200).json({msg:"Usuario deletado com sucesso"})
+	// JSON
+	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))
+	// if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
+	// users.splice(indice, 1)
+	// res.status(200).json({msg:"Usuario deletado com sucesso"})
 })
 
 // Run server

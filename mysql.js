@@ -43,13 +43,21 @@ class Mysql {
 		return this._dados.findAll({raw: true})
 	}
 
-	async show(item = {}) {
+	async read(item = {}) {
 		return this._dados.findAll({where: item, raw: true})
 	}
 
-	async store(item) {
+	async create(item) {
 		const { dataValues } = await this._dados.create(item)
 		return dataValues
+	}
+
+	async update(item, id) {
+		return this._dados.update(item, {where: {id: id}})
+	}
+
+	async delete(id) {
+		return this._dados.destroy({where: {id: id}})
 	}
 
 	async isConnected() {

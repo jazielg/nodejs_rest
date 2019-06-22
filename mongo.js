@@ -45,6 +45,10 @@ class Mongo {
 		this._dados = Mongoose.model('dados', dadosSchema)
 	}
 
+	async create(item) {
+		return this._dados.create(item)
+	}
+
 	async isConnected() {
 		return STATE[this._driver.readyState]
 	}

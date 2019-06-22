@@ -7,7 +7,7 @@ const Mongo = require('./mongo')
 let usersJson = require('./users')
 
 // Iniciar conexão MySql
-// const mysql = new Mysql()
+const mysql = new Mysql()
 const mongo = new Mongo()
 
 // Body Parser Middleware
@@ -41,9 +41,13 @@ app.post('/api/user', async (req, res) => {
 		idade: req.body.idade
 	}
 
-	// MySql
-	const data = await mysql.create(newUser)
+	// Mongo
+	const data = await mongo.create(newUser)
 	res.status(201).json({msg: 'Criado com sucesso', data})
+
+	// MySql
+	// const data = await mysql.create(newUser)
+	// res.status(201).json({msg: 'Criado com sucesso', data})
 
 	// JSON
 	// usersJSON.push(newUser)

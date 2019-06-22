@@ -1,12 +1,14 @@
 const express = require('express')
 const app = express();
 const Mysql = require('./mysql')
+const Mongo = require('./mongo')
 
 // Dados Javascript
 let usersJson = require('./users')
 
 // Iniciar conexão MySql
-const mysql = new Mysql()
+// const mysql = new Mysql()
+const mongo = new Mongo()
 
 // Body Parser Middleware
 app.use(express.json())

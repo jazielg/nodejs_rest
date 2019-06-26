@@ -1,14 +1,17 @@
 const express = require('express')
 const app = express();
 const Mysql = require('./mysql')
-const Mongo = require('./mongo')
+
+const Mongo = require('./mongo/mongo')
+const PessoaSchema = require('./mongo/schemas/pessoaSchema')
 
 // Dados Javascript
 let usersJson = require('./users')
 
 // Iniciar conexão MySql
 // const db = new Mysql()
-const db = new Mongo()
+const connection = Mongo.connect()
+const db = new Mongo(connection, PessoaSchema)
 
 // Body Parser Middleware
 app.use(express.json())

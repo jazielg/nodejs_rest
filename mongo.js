@@ -45,8 +45,24 @@ class Mongo {
 		this._dados = Mongoose.model('dados', dadosSchema)
 	}
 
+	async index(skip=0, limit=10) {
+		return this._dados.find().skip(skip).limit(limit)
+	}
+	
+	async read(id) {
+		return this._dados.findById(id)
+	}
+
 	async create(item) {
 		return this._dados.create(item)
+	}
+
+	async update(item, id) {
+		return this._dados.updateOne({ _id: id}, {$set: item })
+	}
+
+	async delete(id) {
+		return this._dados.deleteOne({ _id: id})
 	}
 
 	async isConnected() {

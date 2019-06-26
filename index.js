@@ -7,8 +7,8 @@ const Mongo = require('./mongo')
 let usersJson = require('./users')
 
 // Iniciar conexão MySql
-const mysql = new Mysql()
-const mongo = new Mongo()
+// const db = new Mysql()
+const db = new Mongo()
 
 // Body Parser Middleware
 app.use(express.json())
@@ -16,8 +16,8 @@ app.use(express.urlencoded({ extended: false }))
 
 // Index
 app.get('/api/users', async (req, res) => {
-	// Mysql
-	const dados = await mysql.index()
+	// Mysql e Mongo
+	const dados = await db.index()
 	res.status(200).json(dados)
 
 	// JSON
@@ -25,9 +25,9 @@ app.get('/api/users', async (req, res) => {
 })
 
 // Read
-app.get('/api/user/:id', async (req, res) => {
-	// Mysql
-	const user = await mysql.read({id: req.params.id})
+app.get('/api/users/:id', async (req, res) => {
+	// Mysql e Mongo
+	const user = await db.read(req.params.id)
 	res.status(200).json(user)
 
 	// JSON
@@ -35,19 +35,15 @@ app.get('/api/user/:id', async (req, res) => {
 })
 
 // Create
-app.post('/api/user', async (req, res) => {
+app.post('/api/users', async (req, res) => {
 	const newUser = {
 		nome: req.body.nome,
 		idade: req.body.idade
 	}
 
-	// Mongo
-	const data = await mongo.create(newUser)
+	// Mysql e Mongo
+	const data = await db.create(newUser)
 	res.status(201).json({msg: 'Criado com sucesso', data})
-
-	// MySql
-	// const data = await mysql.create(newUser)
-	// res.status(201).json({msg: 'Criado com sucesso', data})
 
 	// JSON
 	// usersJSON.push(newUser)
@@ -55,11 +51,10 @@ app.post('/api/user', async (req, res) => {
 })
 
 // Update
-app.put('/api/user/:id', async (req, res) => {
-	// Mysql
-	const [data] = await mysql.update(req.body, req.params.id)
-	if(data === 1) res.status(200).json({msg:"Usuario atualizado com sucesso"})
-	res.status(422).json({msg:"Usuarios com parametros errados"})
+app.put('/api/users/:id', async (req, res) => {
+	// Mysql e Mongo
+	const data = await db.update(req.body, req.params.id)
+	res.status(200).json({msg:"Usuario atualizado com sucesso"})
 
 	// JSON
 	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))
@@ -70,11 +65,10 @@ app.put('/api/user/:id', async (req, res) => {
 })
 
 // Delete
-app.delete('/api/user/:id', async (req, res) => {
-	// Mysql
-	const data = await mysql.delete(req.params.id)
-	if(data === 1) res.status(200).json({msg:"Usuario deletado com sucesso"})
-	res.status(404).json({msg:"Usuario não foi encontrado"})
+app.delete('/api/users/:id', async (req, res) => {
+	// Mysql e Mongo
+	const data = await db.delete(req.params.id)
+	res.status(200).json({msg:"Usuario deletado com sucesso"})
 
 	// JSON
 	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))

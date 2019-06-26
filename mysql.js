@@ -43,8 +43,8 @@ class Mysql {
 		return this._dados.findAll({raw: true})
 	}
 
-	async read(item = {}) {
-		return this._dados.findAll({where: item, raw: true})
+	async read(id) {
+		return this._dados.findAll({where: {id}, raw: true})
 	}
 
 	async create(item) {
@@ -53,11 +53,11 @@ class Mysql {
 	}
 
 	async update(item, id) {
-		return this._dados.update(item, {where: {id: id}})
+		return this._dados.update(item, {where: {id}})
 	}
 
 	async delete(id) {
-		return this._dados.destroy({where: {id: id}})
+		return this._dados.destroy({where: {id}})
 	}
 
 	async isConnected() {

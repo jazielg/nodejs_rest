@@ -8,12 +8,12 @@ const STATE = {
 
 class Mongo {
 
-	constructor(connection, schema) {
-		this._connection = connection
+	constructor(schema) {
+		this._connection = this.connect()
 		this._schema = schema
 	}
 
-	static connect() {
+	async connect() {
 		Mongoose.connect('mongodb://localhost:27017/nodejs', {useNewUrlParser: true}, function(error) {
 			if(!error) return ;
 			console.log('Erro na conexão', error)

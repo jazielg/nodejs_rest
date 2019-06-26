@@ -1,17 +1,17 @@
 const express = require('express')
 const app = express();
-const Mysql = require('./mysql')
+
+const Mysql = require('./mysql/mysql')
+const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
 
 const Mongo = require('./mongo/mongo')
-const PessoaSchema = require('./mongo/schemas/pessoaSchema')
+const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 
 // Dados Javascript
 let usersJson = require('./users')
 
-// Iniciar conexão MySql
-// const db = new Mysql()
-const connection = Mongo.connect()
-const db = new Mongo(connection, PessoaSchema)
+const db = new Mysql(PessoaSchemaMysql)
+// const db = new Mongo(PessoaSchemaMongo)
 
 // Body Parser Middleware
 app.use(express.json())

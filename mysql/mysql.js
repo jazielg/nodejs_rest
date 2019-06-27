@@ -3,6 +3,7 @@ const Sequelize = require('sequelize')
 class Mysql {
 
 	constructor(schema) {
+		this._schema = null
 		this._connection = this.connect()
 		this.defineModel(schema)
 	}

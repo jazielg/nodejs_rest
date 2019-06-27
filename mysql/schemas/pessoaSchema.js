@@ -24,6 +24,7 @@ const pessoaSchema = {
         timestamps: true,
         paranoid: false, // SoftDeletes
         underscored: false, // updated_at
+        logging: false
     }
 }
 

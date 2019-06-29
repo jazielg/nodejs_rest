@@ -24,8 +24,8 @@ class Mysql {
 		this._schema = await model.sync()
 	}
 
-	async index() {
-		return this._schema.findAll({raw: true})
+	async index(offset = null, limit = null) {
+		return this._schema.findAll({offset, limit, raw: true })
 	}
 
 	async read(id) {
@@ -37,7 +37,7 @@ class Mysql {
 		return dataValues
 	}
 
-	async update(item, id) {
+	async update(id, item) {
 		return this._schema.update(item, {where: {id}})
 	}
 

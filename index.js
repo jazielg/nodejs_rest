@@ -10,8 +10,8 @@ const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 // Dados Javascript
 let usersJson = require('./users')
 
-const db = new Mysql(PessoaSchemaMysql)
-// const db = new Mongo(PessoaSchemaMongo)
+// const db = new Mysql(PessoaSchemaMysql)
+const db = new Mongo(PessoaSchemaMongo)
 
 // Body Parser Middleware
 app.use(express.json())
@@ -19,8 +19,11 @@ app.use(express.urlencoded({ extended: false }))
 
 // Index
 app.get('/api/users', async (req, res) => {
+	let { offset, limit } = req.query
+	offset = (offset) ? parseInt(offset) : null
+	limit = (limit) ? parseInt(limit) : null
 	// Mysql e Mongo
-	const dados = await db.index()
+	const dados = await db.index(offset, limit)
 	res.status(200).json(dados)
 
 	// JSON
@@ -56,7 +59,7 @@ app.post('/api/users', async (req, res) => {
 // Update
 app.put('/api/users/:id', async (req, res) => {
 	// Mysql e Mongo
-	const data = await db.update(req.body, req.params.id)
+	const data = await db.update(req.params.id, req.body)
 	res.status(200).json({msg:"Usuario atualizado com sucesso"})
 
 	// JSON

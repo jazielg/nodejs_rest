@@ -37,7 +37,7 @@ class Mongo {
 		return this._schema.create(item)
 	}
 
-	async update(item, id) {
+	async update(id, item) {
 		return this._schema.updateOne({ _id: id}, {$set: item })
 	}
 

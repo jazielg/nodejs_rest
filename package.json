@@ -13,6 +13,7 @@
     "nodemon": "^1.19.1"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
     "hapi": "^18.1.0",
     "hapi-auth-jwt2": "^8.6.1",

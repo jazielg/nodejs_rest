@@ -42,7 +42,7 @@ async function main() {
     app.route([
         // Index
         {
-            path: '/api/users',
+            path: '/api/pessoas',
             method: 'GET',
             config: {
                 validate: {
@@ -64,7 +64,7 @@ async function main() {
         },
         // Read
         {
-            path: '/api/users/{id}',
+            path: '/api/pessoas/{id}',
             method: 'GET',
             config: {
                 validate: {
@@ -78,7 +78,7 @@ async function main() {
         },
         // Create
         {
-            path: '/api/users',
+            path: '/api/pessoas',
             method: 'POST',
             config: {
                 validate: {
@@ -100,7 +100,7 @@ async function main() {
         },
         // Update
         {
-            path: '/api/users/{id}',
+            path: '/api/pessoas/{id}',
             method: 'PATCH',
             config: {
                 validate: {
@@ -130,7 +130,7 @@ async function main() {
         },
         // Delete
         {
-            path: "/api/users/{id}",
+            path: "/api/pessoas/{id}",
             method: "DELETE",
             config: {
                 validate: {

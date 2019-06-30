@@ -7,12 +7,37 @@ const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
 const Mongo = require('./mongo/mongo')
 const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 
+const Jwt = require('jsonwebtoken')
+const HapiJwt = require('hapi-auth-jwt2')
+const JWT_SECRET = 'MINHA_CHAVE_SECRETA'
+
 const app = new Hapi.server({
     port: 5000
 })
 
 async function main() {
     const db = new Mongo(PessoaSchemaMongo)
+
+    await app.register([
+        HapiJwt
+    ])
+    app.auth.strategy('jwt', 'jwt', {
+        key: JWT_SECRET,
+        // options: {
+        //     expiresIn: 20
+        // },
+        validate: (dado, request) => {
+            // Verifica no banco se o usuario continua ativo
+            return {
+                isValid: true // caso não valido false  
+            }
+        }
+    })
+    app.auth.default('jwt')
+
+    const headers = Joi.object({
+        authorization: Joi.string().required()
+    }).unknown()
 
     app.route([
         // Index
@@ -24,6 +49,7 @@ async function main() {
                     failAction: (request, headers, erro) => {
                         throw erro
                     },
+                    headers,
                     query: {
                         offset: Joi.number().integer().default(null),
                         limit: Joi.number().integer().default(null)
@@ -40,6 +66,11 @@ async function main() {
         {
             path: '/api/users/{id}',
             method: 'GET',
+            config: {
+                validate: {
+                    headers
+                }
+            },
             handler: async (request, headers) => {
                 const data = await db.read(request.params.id)
                 return headers.response(data).code(200)
@@ -54,6 +85,7 @@ async function main() {
                     failAction: (request, headers, erro) => {
                         throw erro
                     },
+                    headers,
                     payload: {
                         nome: Joi.string().required().min(3).max(255),
                         idade: Joi.number().integer().required()
@@ -61,9 +93,9 @@ async function main() {
                 }
             },
             handler: async (request, headers) => {
-                const {nome, idade} = request.payload
-                const data = await db.create({nome, idade})
-                return headers.response({message:"Criado com sucesso!", data}).code(201)
+                const { nome, idade } = request.payload
+                const data = await db.create({ nome, idade })
+                return headers.response({ message: "Criado com sucesso!", data }).code(201)
             }
         },
         // Update
@@ -75,6 +107,7 @@ async function main() {
                     failAction: (request, headers, erro) => {
                         throw erro
                     },
+                    headers,
                     params: {
                         id: Joi.string().required()
                     },
@@ -95,6 +128,7 @@ async function main() {
                 return headers.response('Atualizado com sucesso!').code(200)
             }
         },
+        // Delete
         {
             path: "/api/users/{id}",
             method: "DELETE",
@@ -103,6 +137,7 @@ async function main() {
                     failAction: (request, headers, erro) => {
                         throw erro
                     },
+                    headers,
                     params: {
                         id: Joi.string().required()
                     }
@@ -112,7 +147,37 @@ async function main() {
                 const { id } = request.params
 
                 const result = await db.delete(id)
-                return headers.response({message:"Deletado com sucesso!", result}).code(200)
+                return headers.response({ message: "Deletado com sucesso!", result }).code(200)
+            }
+        },
+        // AUTH
+        {
+            path: "/api/login",
+            method: "POST",
+            config: {
+                auth: false,
+                validate: {
+                    failAction: (request, headers, erro) => {
+                        throw erro
+                    },
+                    payload: {
+                        username: Joi.string().required().max(255),
+                        password: Joi.string().required()
+                    }
+                }
+            },
+            handler: async (request, headers) => {
+                const { username, password } = request.payload
+
+                if (username !== 'user1' || password !== '123')
+                    return headers.response({ statusCode: 401, error: "Unauthorized", message: "Unauthorized" }).code(401)
+
+                const token = Jwt.sign({
+                    username,
+                    id: 1
+                }, JWT_SECRET)
+
+                return { token }
             }
         }
     ])

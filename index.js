@@ -49,7 +49,7 @@ app.post('/api/users', async (req, res) => {
 
 	// Mysql e Mongo
 	const data = await db.create(newUser)
-	res.status(201).json({msg: 'Criado com sucesso', data})
+	res.status(201).json({ msg: 'Criado com sucesso', data })
 
 	// JSON
 	// usersJSON.push(newUser)
@@ -60,13 +60,13 @@ app.post('/api/users', async (req, res) => {
 app.put('/api/users/:id', async (req, res) => {
 	// Mysql e Mongo
 	const data = await db.update(req.params.id, req.body)
-	res.status(200).json({msg:"Usuario atualizado com sucesso"})
+	res.status(200).json({ msg: "Usuario atualizado com sucesso" })
 
 	// JSON
 	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))
-    // if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
+	// if (indice === -1) res.status(404).json({msg: "Usuario não encontrado"})
 	// updateUser = req.body
-    // users[indice] = {...users[indice], ...updateUser}
+	// users[indice] = {...users[indice], ...updateUser}
 	// res.status(200).json({msg:"Usuario atualizado com sucesso"})
 })
 
@@ -74,7 +74,7 @@ app.put('/api/users/:id', async (req, res) => {
 app.delete('/api/users/:id', async (req, res) => {
 	// Mysql e Mongo
 	const data = await db.delete(req.params.id)
-	res.status(200).json({msg:"Usuario deletado com sucesso"})
+	res.status(200).json({ msg: "Usuario deletado com sucesso" })
 
 	// JSON
 	// const indice = users.findIndex(item => item.id === parseInt(req.params.id))

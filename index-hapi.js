@@ -4,12 +4,15 @@ const Joi = require('joi')
 const Mysql = require('./mysql/mysql')
 const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
 
+const Mongo = require('./mongo/mongo')
+const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
+
 const app = new Hapi.server({
     port: 5000
 })
 
 async function main() {
-    const db = new Mysql(PessoaSchemaMysql)
+    const db = new Mongo(PessoaSchemaMongo)
 
     app.route([
         // Index
@@ -27,17 +30,19 @@ async function main() {
                     }
                 }
             },
-            handler: (request, head) => {
+            handler: async (request, headers) => {
                 const { offset, limit } = request.query
-                return db.index(offset, limit)
+                const data = await db.index(offset, limit)
+                return headers.response(data).code(200)
             }
         },
         // Read
         {
             path: '/api/users/{id}',
             method: 'GET',
-            handler: (request, head) => {
-                return db.read(request.params.id)
+            handler: async (request, headers) => {
+                const data = await db.read(request.params.id)
+                return headers.response(data).code(200)
             }
         },
         // Create
@@ -57,8 +62,8 @@ async function main() {
             },
             handler: async (request, headers) => {
                 const {nome, idade} = request.payload
-                const result = await db.create({nome, idade})
-                return headers.response(result).code(201)
+                const data = await db.create({nome, idade})
+                return headers.response({message:"Criado com sucesso!", data}).code(201)
             }
         },
         // Update
@@ -87,7 +92,27 @@ async function main() {
                 const dados = JSON.parse(dadosString)
 
                 const result = await db.update(id, dados)
-                return headers.response().code(204)
+                return headers.response('Atualizado com sucesso!').code(200)
+            }
+        },
+        {
+            path: "/api/users/{id}",
+            method: "DELETE",
+            config: {
+                validate: {
+                    failAction: (request, headers, erro) => {
+                        throw erro
+                    },
+                    params: {
+                        id: Joi.string().required()
+                    }
+                }
+            },
+            handler: async (request, headers) => {
+                const { id } = request.params
+
+                const result = await db.delete(id)
+                return headers.response({message:"Deletado com sucesso!", result}).code(200)
             }
         }
     ])

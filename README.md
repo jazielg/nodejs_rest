@@ -14,20 +14,20 @@ npm start
 
 #### Rotas Usuários - Autenticação
  - POST /api/register
- `curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/register`
+ ```curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/register```
 
  - POST /api/login
- `curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/login`
+ ```curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/login```
 
 #### Rotas Pessoas - Dados
- - GET /api/pessoas
- `curl -H "Authorization:token" -H "Content-Type: application/json" -X GET http://localhost:5000/api/pessoas`
- - POST /api/pessoas
- `curl -d '{"nome":"pessoa2", "idade":"20"}' -H "Content-Type: application/json" -H "Authorization:token" -X POST http://localhost:5000/api/pessoas`
- - GET /api/pessoas/:id
- `curl -H "Content-Type: application/json" -H "Authorization:token" -X GET http://localhost:5000/api/pessoas/1`
- - PUT /api/pessoas/:id
- `curl -d '{"idade":"21"}' -H "Content-Type: application/json" -H "Authorization:token" -X PATCH http://localhost:5000/api/pessoas/2`
- - DELETE /api/pessoas/:id
-  `curl -H "Content-Type: application/json" -H "Authorization:token" -X DELETE http://localhost:5000/api/pessoas/2`
+ - GET /api/pessoas (protegida)
+ ```curl -H "Authorization:token" -H "Content-Type: application/json" -X GET http://localhost:5000/api/pessoas```
+ - POST /api/pessoas (protegida)
+ ```curl -d '{"nome":"pessoa1", "idade":"20"}' -H "Content-Type: application/json" -H "Authorization:token" -X POST http://localhost:5000/api/pessoas```
+ - GET /api/pessoas/:id (protegida)
+ ```curl -H "Content-Type: application/json" -H "Authorization:token" -X GET http://localhost:5000/api/pessoas/1```
+ - PUT /api/pessoas/:id (protegida)
+ ```curl -d '{"idade":"21"}' -H "Content-Type: application/json" -H "Authorization:token" -X PATCH http://localhost:5000/api/pessoas/1```
+ - DELETE /api/pessoas/:id (protegida)
+  ```curl -H "Content-Type: application/json" -H "Authorization:token" -X DELETE http://localhost:5000/api/pessoas/1```
   

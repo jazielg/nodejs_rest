@@ -3,12 +3,16 @@ const Joi = require('joi')
 
 const Mysql = require('./mysql/mysql')
 const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
+const UsuarioSchemaMysql = require('./mysql/schemas/usuarioSchema')
 
 const Mongo = require('./mongo/mongo')
 const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 
 const Jwt = require('jsonwebtoken')
 const HapiJwt = require('hapi-auth-jwt2')
+
+const PasswordHelper = require('./helpers/passwordHelper')
+
 const JWT_SECRET = 'MINHA_CHAVE_SECRETA'
 
 const app = new Hapi.server({
@@ -16,7 +20,8 @@ const app = new Hapi.server({
 })
 
 async function main() {
-    const db = new Mongo(PessoaSchemaMongo)
+    const db = new Mysql(PessoaSchemaMysql)
+    const db_auth = new Mysql(UsuarioSchemaMysql)
 
     await app.register([
         HapiJwt
@@ -26,8 +31,17 @@ async function main() {
         // options: {
         //     expiresIn: 20
         // },
-        validate: (dado, request) => {
-            // Verifica no banco se o usuario continua ativo
+        validate: async (dado, request) => {
+            // Verifica no banco se o usuario existe
+            const [result] = await db_auth.read({
+                username: dado.username.toLowerCase(),
+                id: dado.id
+            })
+            if(!result) {
+                return {
+                    isValid: false
+                }
+            }
             return {
                 isValid: true // caso não valido false  
             }
@@ -72,7 +86,7 @@ async function main() {
                 }
             },
             handler: async (request, headers) => {
-                const data = await db.read(request.params.id)
+                const data = await db.read({id: request.params.id})
                 return headers.response(data).code(200)
             }
         },
@@ -150,7 +164,7 @@ async function main() {
                 return headers.response({ message: "Deletado com sucesso!", result }).code(200)
             }
         },
-        // AUTH
+        // AUTH - Login
         {
             path: "/api/login",
             method: "POST",
@@ -169,15 +183,49 @@ async function main() {
             handler: async (request, headers) => {
                 const { username, password } = request.payload
 
-                if (username !== 'user1' || password !== '123')
-                    return headers.response({ statusCode: 401, error: "Unauthorized", message: "Unauthorized" }).code(401)
+                const [usuario] = await db_auth.read({
+                    username: username.toLowerCase()
+                })
+                console.log('usuaio', usuario)
+                if(!usuario)  return headers.response({ statusCode: 401, error: "Unauthorized", message: "Usuario ou senha invalida" }).code(401)
+                
+                const match = await PasswordHelper.comparePassword(password, usuario.password)
+                if(!match) return headers.response({ statusCode: 401, error: "Unauthorized", message: "Usuario ou senha invalida" }).code(401)
+                // if (username !== 'user1' || password !== '123')
+                //     return headers.response({ statusCode: 401, error: "Unauthorized", message: "Unauthorized" }).code(401)
 
                 const token = Jwt.sign({
                     username,
-                    id: 1
+                    id: usuario.id
                 }, JWT_SECRET)
 
                 return { token }
+            }
+        },
+        // AUTH - REGISTER
+        {
+            path: '/api/register',
+            method: 'POST',
+            config: {
+                auth: false,
+                validate: {
+                    failAction: (request, headers, erro) => {
+                        throw erro
+                    },
+                    payload: {
+                        username: Joi.string().required().max(255),
+                        password: Joi.string().required()
+                    }
+                }
+            },
+            handler: async (request, headers) => {
+                const { username, password } = request.payload
+                const usernameToLower = username.toLowerCase()
+                const passwordHash = await PasswordHelper.hashPassword(password)
+                
+                const data = await db_auth.create({ username: usernameToLower, password: passwordHash })
+
+                return headers.response({ message: "Usuario criado com sucesso!", data }).code(201)
             }
         }
     ])

@@ -28,8 +28,8 @@ class Mysql {
 		return this._schema.findAll({offset, limit, raw: true })
 	}
 
-	async read(id) {
-		return this._schema.findAll({where: {id}, raw: true})
+	async read(query) {
+		return this._schema.findAll({where: query, raw: true})
 	}
 
 	async create(item) {

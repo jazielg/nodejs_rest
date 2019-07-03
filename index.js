@@ -10,8 +10,8 @@ const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 // Dados Javascript
 let pessoasJson = require('./pessoas')
 
-// const db = new Mysql(PessoaSchemaMysql)
-const db = new Mongo(PessoaSchemaMongo)
+const db = new Mysql(PessoaSchemaMysql)
+// const db = new Mongo(PessoaSchemaMongo)
 
 // Body Parser Middleware
 app.use(express.json())
@@ -33,7 +33,7 @@ app.get('/api/pessoas', async (req, res) => {
 // Read
 app.get('/api/pessoas/:id', async (req, res) => {
 	// Mysql e Mongo
-	const pessoa = await db.read(req.params.id)
+	const pessoa = await db.read({id: req.params.id})
 	res.status(200).json(pessoa)
 
 	// JSON

@@ -1,13 +1,16 @@
 const Hapi = require('hapi')
 const Joi = require('joi')
 
+// Mysql Schemas
 const Mysql = require('./mysql/mysql')
 const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
 const UsuarioSchemaMysql = require('./mysql/schemas/usuarioSchema')
 
+// Mongo Schemas
 const Mongo = require('./mongo/mongo')
 const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 
+// Autenticação
 const Jwt = require('jsonwebtoken')
 const HapiJwt = require('hapi-auth-jwt2')
 
@@ -186,7 +189,7 @@ async function main() {
                 const [usuario] = await db_auth.read({
                     username: username.toLowerCase()
                 })
-                console.log('usuaio', usuario)
+
                 if(!usuario)  return headers.response({ statusCode: 401, error: "Unauthorized", message: "Usuario ou senha invalida" }).code(401)
                 
                 const match = await PasswordHelper.comparePassword(password, usuario.password)

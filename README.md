@@ -19,7 +19,9 @@ npm start
  ```
 
  - POST `/api/login` <br>
- `curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/login`
+ ```bash
+ curl -d '{"username":"user", "password":"mypass"}' -H "Content-Type: application/json" -X POST http://localhost:5000/api/login
+ ```
 
 #### Rotas Pessoas - Dados
  - GET `/api/pessoas` (protegida) <br>

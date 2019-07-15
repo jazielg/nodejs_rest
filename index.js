@@ -1,16 +1,22 @@
 const express = require('express')
 const app = express();
+const { check, validationResult } = require('express-validator')
 
 const Mysql = require('./mysql/mysql')
 const PessoaSchemaMysql = require('./mysql/schemas/pessoaSchema')
+const UsuarioSchemaMysql = require('./mysql/schemas/usuarioSchema')
 
 const Mongo = require('./mongo/mongo')
 const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
+
+// Autenticação
+PasswordHelper = require('./helpers/passwordHelper')
 
 // Dados Javascript
 let pessoasJson = require('./pessoas')
 
 const db = new Mysql(PessoaSchemaMysql)
+const db_auth = new Mysql(UsuarioSchemaMysql)
 // const db = new Mongo(PessoaSchemaMongo)
 
 // Body Parser Middleware
@@ -31,7 +37,15 @@ app.get('/api/pessoas', async (req, res) => {
 })
 
 // Read
-app.get('/api/pessoas/:id', async (req, res) => {
+app.get('/api/pessoas/:id', [
+	check('id', 'Id invalido').isInt()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
 	// Mysql e Mongo
 	const pessoa = await db.read({id: req.params.id})
 	res.status(200).json(pessoa)
@@ -41,7 +55,16 @@ app.get('/api/pessoas/:id', async (req, res) => {
 })
 
 // Create
-app.post('/api/pessoas', async (req, res) => {
+app.post('/api/pessoas', [
+	check('nome').isString().isLength({ max: 255 }),
+	check('idade').isNumeric()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
 	const novaPessoa = {
 		nome: req.body.nome,
 		idade: req.body.idade
@@ -57,7 +80,16 @@ app.post('/api/pessoas', async (req, res) => {
 })
 
 // Update
-app.patch('/api/pessoas/:id', async (req, res) => {
+app.patch('/api/pessoas/:id', [
+	check('nome', 'Nome invalido').isString().isLength({ max: 255 }),
+	check('idade', 'Idade invalida').isNumeric()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
 	// Mysql e Mongo
 	const data = await db.update(req.params.id, req.body)
 	res.status(200).json({ message: "Usuario atualizado com sucesso", data })
@@ -71,7 +103,15 @@ app.patch('/api/pessoas/:id', async (req, res) => {
 })
 
 // Delete
-app.delete('/api/pessoas/:id', async (req, res) => {
+app.delete('/api/pessoas/:id', [
+	check('id', 'Id invalido').isInt()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
 	// Mysql e Mongo
 	const data = await db.delete(req.params.id)
 	res.status(200).json({ message: "Usuario deletado com sucesso" })
@@ -81,6 +121,38 @@ app.delete('/api/pessoas/:id', async (req, res) => {
 	// if (indice === -1) res.status(404).json({message: "Usuario não encontrado"})
 	// pessoas.splice(indice, 1)
 	// res.status(200).json({message:"Usuario deletado com sucesso"})
+})
+
+// AUTH - Register
+app.post('/api/register',[
+	check('username', 'Username invalido.').isString().isLength({ max: 255 }),
+	check('password', 'Senha invalida.').isString()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
+	const { username, password } = req.body
+	const novoUsername = username.toLowerCase()
+	const novoPassword = await PasswordHelper.hashPassword(password)
+	
+	const data = await db_auth.create({username: novoUsername, password: novoPassword})
+	res.status(201).json(data)
+})
+
+// AUTH - Login
+app.post('/api/login', [
+	check('username', 'Username ou senha invalida.').isString().isLength({ max: 255 }),
+	check('password', 'Username ou senha invalida.').isString()
+], async (req, res) => {
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(422).json({ errors: errors.array() });
+	}
+
 })
 
 // Run server

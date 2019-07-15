@@ -162,12 +162,12 @@ app.post('/api/login', [
 	if(!usuario)  return res.status(422).json({message: "Usuario ou senha invalida"})
 
 	const match = await PasswordHelper.comparePassword(password, usuario.password)
-	if(!usuario)  return res.status(422).json({message: "Usuario ou senha invalida"})
+	if(!match)  return res.status(422).json({message: "Usuario ou senha invalida"})
 
 	const token = Jwt.sign({
 		username,
 		id: usuario.id
-	}, JWT_SECRET)
+	}, JWT_SECRET, { expiresIn: '24h' })
 
 	return res.status(200).json({ token });
 })

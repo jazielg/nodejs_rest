@@ -29,9 +29,9 @@ async function main() {
     ])
     app.auth.strategy('jwt', 'jwt', {
         key: JWT_SECRET,
-        // options: {
-        //     expiresIn: 20
-        // },
+        options: {
+            expiresIn: '24h'
+        },
         validate: async (dado, request) => {
             // Verifica no banco se o usuario existe
             const [result] = await db_auth.read({

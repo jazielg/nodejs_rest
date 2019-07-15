@@ -10,7 +10,9 @@ const Mongo = require('./mongo/mongo')
 const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 
 // Autenticação
-PasswordHelper = require('./helpers/passwordHelper')
+const Jwt = require('jsonwebtoken')
+const PasswordHelper = require('./helpers/passwordHelper')
+const JWT_SECRET = 'MINHA_CHAVE_SECRETA'
 
 // Dados Javascript
 let pessoasJson = require('./pessoas')
@@ -24,7 +26,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 // Index
-app.get('/api/pessoas', async (req, res) => {
+app.get('/api/pessoas', verifyToken, async (req, res) => {
 	let { offset, limit } = req.query
 	offset = (offset) ? parseInt(offset) : null
 	limit = (limit) ? parseInt(limit) : null
@@ -39,7 +41,7 @@ app.get('/api/pessoas', async (req, res) => {
 // Read
 app.get('/api/pessoas/:id', [
 	check('id', 'Id invalido').isInt()
-], async (req, res) => {
+], verifyToken, async (req, res) => {
 
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -58,7 +60,7 @@ app.get('/api/pessoas/:id', [
 app.post('/api/pessoas', [
 	check('nome').isString().isLength({ max: 255 }),
 	check('idade').isNumeric()
-], async (req, res) => {
+], verifyToken, async (req, res) => {
 
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -83,7 +85,7 @@ app.post('/api/pessoas', [
 app.patch('/api/pessoas/:id', [
 	check('nome', 'Nome invalido').isString().isLength({ max: 255 }),
 	check('idade', 'Idade invalida').isNumeric()
-], async (req, res) => {
+], verifyToken, async (req, res) => {
 
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -105,7 +107,7 @@ app.patch('/api/pessoas/:id', [
 // Delete
 app.delete('/api/pessoas/:id', [
 	check('id', 'Id invalido').isInt()
-], async (req, res) => {
+], verifyToken, async (req, res) => {
 
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -125,7 +127,7 @@ app.delete('/api/pessoas/:id', [
 
 // AUTH - Register
 app.post('/api/register',[
-	check('username', 'Username invalido.').isString().isLength({ max: 255 }),
+	check('username', 'Usuario invalido.').isString().isLength({ max: 255 }),
 	check('password', 'Senha invalida.').isString()
 ], async (req, res) => {
 
@@ -144,8 +146,8 @@ app.post('/api/register',[
 
 // AUTH - Login
 app.post('/api/login', [
-	check('username', 'Username ou senha invalida.').isString().isLength({ max: 255 }),
-	check('password', 'Username ou senha invalida.').isString()
+	check('username', 'Usuario ou senha invalida.').isString().isLength({ max: 255 }),
+	check('password', 'Usuario ou senha invalida.').isString()
 ], async (req, res) => {
 
 	const errors = validationResult(req);
@@ -153,7 +155,38 @@ app.post('/api/login', [
 		return res.status(422).json({ errors: errors.array() });
 	}
 
+	const { username, password } = req.body
+
+	const [usuario] = await db_auth.read({ username: username.toLowerCase() })
+
+	if(!usuario)  return res.status(422).json({message: "Usuario ou senha invalida"})
+
+	const match = await PasswordHelper.comparePassword(password, usuario.password)
+	if(!usuario)  return res.status(422).json({message: "Usuario ou senha invalida"})
+
+	const token = Jwt.sign({
+		username,
+		id: usuario.id
+	}, JWT_SECRET)
+
+	return res.status(200).json({ token });
 })
+
+function verifyToken(req, res, next) {
+	const headerToken = req.headers['authorization']
+
+	if(typeof headerToken !== 'undefined') {
+		Jwt.verify(headerToken, JWT_SECRET, (err, authData) => {
+			if(err) {
+				res.sendStatus(403)
+			} else {
+				next()
+			}
+		})
+	} else {
+		return res.sendStatus(403)
+	}
+}
 
 // Run server
 app.listen(5000, () => console.log('Server running on port 5000'))

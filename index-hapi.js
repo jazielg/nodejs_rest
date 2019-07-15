@@ -13,9 +13,7 @@ const PessoaSchemaMongo = require('./mongo/schemas/pessoaSchema')
 // Autenticação
 const Jwt = require('jsonwebtoken')
 const HapiJwt = require('hapi-auth-jwt2')
-
 const PasswordHelper = require('./helpers/passwordHelper')
-
 const JWT_SECRET = 'MINHA_CHAVE_SECRETA'
 
 const app = new Hapi.server({

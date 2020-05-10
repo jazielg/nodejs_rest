@@ -1,5 +1,5 @@
 # Node.js RESTful API
-> RESTful API construido em Node.js, possibilitando a utilização do framework express ou Hapi, sendo o modo de autenticação aplicado ao framework Hapi, e preparado para utilizar o banco de dados em Mysql ou MongoDB.
+> Aplicação do curso de Nodejs do Erick Wendel(https://erickwendel.teachable.com/), RESTful API construido em Node.js, utilizando o framework express ou Hapi, sendo o modo de autenticação implementado ao framework Hapi, preparado para utilizar o banco de dados Mysql ou MongoDB.
 
 ## Iniciar aplicação
 ```bash
